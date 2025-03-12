@@ -3,6 +3,9 @@
 ## Overview
 **Medical Report Interpreter** is an **on-device AI** application built with FastAPI. It enables users to upload medical report images, extract structured text, provide user-friendly explanations, and support translation and Q&A functionalities. The system runs entirely **locally**, ensuring privacy and security. It integrates **LMStudio** for local AI processing using the **Qwen2-VL-2B-Instruct** model.
 
+![example1](example/screenshoot1.png)
+![example2](example/screenshoot2.png)
+
 ## Project Structure
 ```
 medical-report-interpreter/
