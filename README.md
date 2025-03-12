@@ -99,6 +99,7 @@ You can interact with the system via API:
 - Implement **local storage** for user history to enable further retrieval and personalized interactions.
 - Integrate **RAG (Retrieval-Augmented Generation)** by searching a local vector database for relevant context before generating explanations and answers.
 - Expand translation support to **more languages** beyond Chinese.
+- Support voice input and output, allowing users to interact via speech recognition and text-to-speech synthesis.
 
 ### 3. Model
 - Replace **Qwen2-VL-2B-Instruct** with a **larger and more powerful model**, if resources allow, to enhance processing accuracy.
