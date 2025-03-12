@@ -100,6 +100,7 @@ You can interact with the system via API:
 ### 3. Model
 - Replace **Qwen2-VL-2B-Instruct** with a **larger and more powerful model**, if resources allow, to enhance processing accuracy.
 - Utilize a **domain-specific fine-tuned model** for improved medical interpretation, Q&A, and translation (if the model supports it).
+- Refine the prompt to ensure more accurate and relevant explanations and responses.
 
 ### 4. Frontend & Backend
 - Improve the **frontend UI/UX** to provide a more intuitive and visually appealing experience.
