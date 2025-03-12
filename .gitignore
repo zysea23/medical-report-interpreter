@@ -1,8 +1,8 @@
 venv/
 .venv/
 
-uploads/
-.uploads/
+uploads/*.png
+.uploads/*.png
 
 __pycache__/
 *.pyc
