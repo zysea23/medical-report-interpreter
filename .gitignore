@@ -2,7 +2,9 @@ venv/
 .venv/
 
 uploads/*.png
-.uploads/*.png
+uploads/*.jpg
+!uploads/
+!uploads/.gitkeep
 
 __pycache__/
 *.pyc
