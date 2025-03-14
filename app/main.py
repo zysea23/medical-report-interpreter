@@ -33,115 +33,110 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-   """Render home page"""
-   return templates.TemplateResponse("index.html", {"request": request})
+    """Render home page"""
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 async def save_upload_file(file: UploadFile, directory: Path, filename: str) -> Path:
-   """Save uploaded file and return file path"""
-   file_path = directory / filename
+    """Save uploaded file and return file path"""
+    file_path = directory / filename
 
+    async with aiofiles.open(file_path, 'wb') as out_file:
+        content = await file.read()
+        await out_file.write(content)
 
-   async with aiofiles.open(file_path, 'wb') as out_file:
-       content = await file.read()
-       await out_file.write(content)
-
-
-   return file_path
+    return file_path
 
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-   """Process uploaded medical report image"""
-   try:
-       # Generate unique filename
-       file_extension = os.path.splitext(file.filename)[1]
-       unique_filename = f"{uuid.uuid4()}{file_extension}"
+    """Process uploaded medical report image"""
+    try:
+        # Generate unique filename
+        file_extension = os.path.splitext(file.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
 
+        # Save uploaded file
+        file_path = await save_upload_file(file, UPLOAD_DIR, unique_filename)
 
-       # Save uploaded file
-       file_path = await save_upload_file(file, UPLOAD_DIR, unique_filename)
+        # Process report
+        original_content, explanation = await process_report(file_path)
 
-
-       # Process report
-       original_content, explanation = await process_report(file_path)
-
-
-       return {
-           "success": True,
-           "original_content": original_content,
-           "explanation": explanation,
-           "filename": unique_filename
-       }
-   except Exception as e:
-       return JSONResponse(
-           status_code=500,
-           content={"success": False, "message": f"Processing failed: {str(e)}"}
-       )
+        return {
+            "success": True,
+            "original_content": original_content,
+            "explanation": explanation,
+            "filename": unique_filename
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": f"Processing failed: {str(e)}"}
+        )
 
 
 @app.post("/translate")
 async def translate_text(payload: Dict[str, Any] = Body(...)):
-   """Translate text to the specified language"""
-   try:
-       # Get text and target language from request
-       text = payload.get("text")
-       target_language = payload.get("language", "Chinese")
-      
-       if not text:
-           return JSONResponse(
-               status_code=400,
-               content={"success": False, "message": "No text provided for translation"}
-           )
-      
-       # Initialize LMStudio handler
-       lm_handler = LMStudioHandler()
-      
-       # Translate the text
-       translated_text = await lm_handler.translate_text(text, target_language)
-      
-       return {
-           "success": True,
-           "translated_text": translated_text,
-           "language": target_language
-       }
-   except Exception as e:
-       return JSONResponse(
-           status_code=500,
-           content={"success": False, "message": f"Translation failed: {str(e)}"}
-       )
+    """Translate text to the specified language"""
+    try:
+        # Get text and target language from request
+        text = payload.get("text")
+        target_language = payload.get("language", "Chinese")
+    
+        if not text:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "message": "No text provided for translation"}
+            )
+    
+        # Initialize LMStudio handler
+        lm_handler = LMStudioHandler()
+    
+        # Translate the text
+        translated_text = await lm_handler.translate_text(text, target_language)
+    
+        return {
+            "success": True,
+            "translated_text": translated_text,
+            "language": target_language
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": f"Translation failed: {str(e)}"}
+        )
 
 
 @app.post("/ask")
 async def answer_question(payload: Dict[str, Any] = Body(...)):
-   """Answer medical questions based on report content"""
-   try:
-       # Get report content and question from request
-       report_content = payload.get("report_content")
-       question = payload.get("question")
-      
-       if not report_content or not question:
-           return JSONResponse(
-               status_code=400,
-               content={"success": False, "message": "Both report content and question are required"}
-           )
-      
-       # Initialize LMStudio handler
-       lm_handler = LMStudioHandler()
-      
-       # Answer the question based on report content
-       answer = await lm_handler.answer_medical_question(report_content, question)
-      
-       return {
-           "success": True,
-           "question": question,
-           "answer": answer
-       }
-   except Exception as e:
-       return JSONResponse(
-           status_code=500,
-           content={"success": False, "message": f"Question answering failed: {str(e)}"}
-       )
+    """Answer medical questions based on report content"""
+    try:
+        # Get report content and question from request
+        report_content = payload.get("report_content")
+        question = payload.get("question")
+    
+        if not report_content or not question:
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "message": "Both report content and question are required"}
+            )
+    
+        # Initialize LMStudio handler
+        lm_handler = LMStudioHandler()
+    
+        # Answer the question based on report content
+        answer = await lm_handler.answer_medical_question(report_content, question)
+    
+        return {
+            "success": True,
+            "question": question,
+            "answer": answer
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": f"Question answering failed: {str(e)}"}
+        )
 
 
 # Add RAG enhancement endpoint
@@ -152,16 +147,16 @@ async def enhance_with_rag(payload: Dict[str, Any] = Body(...)):
         # Get medical report content and optional question from request
         report_content = payload.get("report_content")
         question = payload.get("question")
-        
+      
         if not report_content:
             return JSONResponse(
                 status_code=400,
                 content={"success": False, "message": "Medical report content is required"}
             )
-        
+      
         # Process report with RAG service
         result = await rag_service.process_with_rag(report_content, question)
-        
+      
         return result
     except Exception as e:
         return JSONResponse(
@@ -169,30 +164,6 @@ async def enhance_with_rag(payload: Dict[str, Any] = Body(...)):
             content={"success": False, "message": f"RAG enhancement failed: {str(e)}"}
         )
 
-# Add direct medical question answering endpoint
-@app.post("/rag-ask")
-async def answer_medical_query(payload: Dict[str, Any] = Body(...)):
-    """Directly answer medical questions using RAG"""
-    try:
-        # Get question from request
-        question = payload.get("question")
-        
-        if not question:
-            return JSONResponse(
-                status_code=400,
-                content={"success": False, "message": "Question is required"}
-            )
-        
-        # Answer question with RAG service
-        result = await rag_service.answer_medical_question(question)
-        
-        return result
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "message": f"Question answering failed: {str(e)}"}
-        )
-
 
 if __name__ == "__main__":
-   uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
