@@ -3,8 +3,10 @@
 ## Overview
 **Medical Report Interpreter** is an **on-device AI** application built with FastAPI. It enables users to upload medical report images, extract structured text, provide user-friendly explanations, and support translation and Q&A functionalities. The system runs entirely **locally**, ensuring privacy and security. It integrates **LMStudio** for local AI processing using the **Qwen2-VL-2B-Instruct** model.
 
-![example1](example/screenshoot1.png)
-![example2](example/screenshoot2.png)
+![example3](example/ss3.png)
+![example4](example/ss4.png)
+![example5](example/ss5.png)
+
 
 ## Project Structure
 ```
@@ -75,7 +77,17 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
-### 4. Access the Web Interface
+### 4. First-Time Initialization
+
+When running the **Medical Report Interpreter** for the first time, the system performs the following steps:
+
+- **Downloading the Medical Corpus**: The application clones the **textbook corpus** from Hugging Face into `./corpus/textbooks/`.
+- **Embedding the Corpus**: The system **embeds** the textbooks using the **ncbi/MedCPT-Article-Encoder** model and downloads precomputed embeddings if necessary.
+- **Indexing the Corpus**: The system processes and indexes the embedded data for retrieval.
+- **Loading Sentence-Transformers Model**: If the `ncbi/MedCPT-Query-Encoder` model is not found, a new one is initialized with **CLS pooling**.
+- **Starting the FastAPI Server**: The system launches the FastAPI server at `http://0.0.0.0:8000`.
+
+### 5. Access the Web Interface
 
 Open the following URL in a browser:
 
@@ -83,21 +95,21 @@ Open the following URL in a browser:
 http://localhost:8000
 ```
 
-### 5. Upload and Analyze a Medical Report
+### 6. Upload and Analyze a Medical Report
 
 - Navigate to the home page and upload a medical report image (`.jpg`, `.jpeg`, `.png`).
 - The system will extract text and structure, providing an explanation of medical terms.
 
-### 6. Translation
+### 7. Translation
 
 - Click the **Translate** button to convert the explanation into another language (default: Chinese).
 
-### 7. Ask Medical Questions
+### 8. Ask Medical Questions
 
 - Enter a question related to the extracted report content and receive AI-generated answers.
 - Enable **RAG (Retrieval-Augmented Generation)** to enhance explanations with relevant medical literature.
 
-### 8. API Endpoints
+### 9. API Endpoints
 
 You can interact with the system via API:
 
@@ -128,4 +140,3 @@ You can interact with the system via API:
 ### 5. Testing & Evaluation
 - Use **real medical report images** to improve model evaluation and ensure accuracy.
 - (Optional)Develop a robust testing framework for systematic model validation and debugging.
-
