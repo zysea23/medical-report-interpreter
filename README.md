@@ -12,8 +12,22 @@ medical-report-interpreter/
 │
 ├── app/
 │   ├── main.py                  # FastAPI main application
-│   ├── models/lm_handler.py     # Handles LMStudio API interactions
-│   └── services/report_service.py  # Medical report processing service
+│   ├── models/
+│   │   ├── lm_handler.py        # Handles LMStudio API interactions
+│   │   ├── rag_handler.py       # Handles RAG integration
+│   │   └── medrag/              # MedRAG core functionality
+│   │       ├── medrag.py        # Simplified MedRAG implementation
+│   │       └── utils.py         # MedRAG utility functions
+│   ├── services/
+│   │   ├── report_service.py    # Medical report processing service
+│   │   ├── file_service.py      # File handling service
+│   │   └── rag_service.py       # RAG functionality service
+│   └── utils/
+│       └── helpers.py           # Helper functions
+│
+├── corpus/                      # RAG corpus directory
+├── scripts/                      # Utility scripts
+│   └── build_rag_index.py       # Script to pre-build RAG indexes
 │
 ├── static/                      # Frontend assets
 ├── templates/                   # HTML templates
@@ -81,6 +95,7 @@ http://localhost:8000
 ### 7. Ask Medical Questions
 
 - Enter a question related to the extracted report content and receive AI-generated answers.
+- Enable **RAG (Retrieval-Augmented Generation)** to enhance explanations with relevant medical literature.
 
 ### 8. API Endpoints
 
@@ -89,26 +104,28 @@ You can interact with the system via API:
 - **`POST /upload`** – Upload a medical report image for analysis.
 - **`POST /translate`** – Translate extracted report content.
 - **`POST /ask`** – Ask medical-related questions based on extracted data.
-
+- **`POST /rag-enhance`** – Enhance medical explanations using RAG.
+- **`POST /rag-ask`** – Directly query the medical knowledge base with RAG.
 
 ## Future Work
 ### 1. **Runtime**
 - Migrate from LMStudio's local LLM API to **ONNX Runtime**, enabling more efficient execution and compatibility with different hardware, including **Snapdragon-based** devices.
 
-### 2. Function
-- Implement **local storage** for user history to enable further retrieval and personalized interactions.
-- Integrate **RAG (Retrieval-Augmented Generation)** by searching a local vector database for relevant context before generating explanations and answers.
+### 2. Functionality Enhancements
 - Expand translation support to **more languages** beyond Chinese.
-- Support voice input and output, allowing users to interact via speech recognition and text-to-speech synthesis.
+- (Optional)Implement **local storage** for user history to enable further retrieval and personalized interactions.
+- (Optional)Support voice input and output, allowing users to interact via speech recognition and text-to-speech synthesis.
 
-### 3. Model
-- Replace **Qwen2-VL-2B-Instruct** with a **larger and more powerful model**, if resources allow, to enhance processing accuracy.
-- Utilize a **domain-specific fine-tuned model** for improved medical interpretation, Q&A, and translation (if the model supports it).
+
+### 3. Model Improvements
 - Refine the prompt to ensure more accurate and relevant explanations and responses.
+- Utilize a **domain-specific fine-tuned model** for improved medical interpretation, Q&A, and translation.
+- (Optional)Replace **Qwen2-VL-2B-Instruct** with a **larger and more powerful model**, if resources allow, to enhance processing accuracy.
 
-### 4. Frontend & Backend
+### 4. Frontend & Backend Enhancements
 - Improve the **frontend UI/UX** to provide a more intuitive and visually appealing experience.
-- Enhance the **backend architecture** to improve stability, scalability, and maintainability.
 
-### 5. Testing
-- Find and use **real medical report images** to enhance model evaluation and ensure accuracy.
+### 5. Testing & Evaluation
+- Use **real medical report images** to improve model evaluation and ensure accuracy.
+- (Optional)Develop a robust testing framework for systematic model validation and debugging.
+

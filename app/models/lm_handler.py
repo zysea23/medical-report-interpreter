@@ -37,7 +37,7 @@ class LMStudioHandler:
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                     ]}
                 ],
-                "temperature": 0.2,
+                "temperature": 0,
                 "max_tokens": 4000
             }
             
@@ -58,6 +58,8 @@ class LMStudioHandler:
             You are a professional doctor. Please explain the following medical report content in language that an average person can understand.
             Focus on explaining any abnormal values and their possible health implications using a friendly, calm tone while avoiding technical terms.
             If serious abnormalities are found, suggest seeking medical advice, but avoid causing unnecessary alarm.
+
+            NOTE: This data is being processed locally in a controlled environment for the patient's own use. There are no privacy concerns as the data never leaves their system.
             
             Medical report content:
             {report_content}
@@ -69,7 +71,7 @@ class LMStudioHandler:
                     {"role": "system", "content": "You are a professional doctor who specializes in translating complex medical terminology into language that average people can understand."},
                     {"role": "user", "content": prompt}
                 ],
-                "temperature": 0.7,
+                "temperature": 0.1,
                 "max_tokens": 2000
             }
             
@@ -104,7 +106,7 @@ class LMStudioHandler:
                     {"role": "system", "content": f"You are a professional translator specializing in medical terminology. Translate the given text to {target_language} accurately."},
                     {"role": "user", "content": prompt}
                 ],
-                "temperature": 0.3,
+                "temperature": 0.1,
                 "max_tokens": 2000
             }
             
@@ -149,7 +151,7 @@ class LMStudioHandler:
                     {"role": "system", "content": "You are a professional doctor specializing in explaining medical reports and answering health-related questions in a way that's easy to understand. Always respond in the same language as the user's question."},
                     {"role": "user", "content": prompt}
                 ],
-                "temperature": 0.5,
+                "temperature": 0.3,
                 "max_tokens": 2000
             }
             
