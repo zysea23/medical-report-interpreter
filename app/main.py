@@ -3,6 +3,7 @@ from fastapi import FastAPI, File, UploadFile, Request, Body
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
 from pathlib import Path
@@ -20,6 +21,14 @@ from app.services.rag_service import rag_service
 # Create FastAPI application
 app = FastAPI(title="Medical Report Interpreter")
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Setup static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -51,6 +60,9 @@ async def save_upload_file(file: UploadFile, directory: Path, filename: str) -> 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     """Process uploaded medical report image"""
+    # calculate processing time
+    import time
+    start_time = time.time()
     try:
         # Generate unique filename
         file_extension = os.path.splitext(file.filename)[1]
@@ -62,6 +74,11 @@ async def upload_file(file: UploadFile = File(...)):
         # Process report
         original_content, explanation = await process_report(file_path)
 
+        
+        # calculate processing time
+        end_time = time.time()
+        processing_time = end_time - start_time
+        print(f"Processing time: {processing_time} seconds")
         return {
             "success": True,
             "original_content": original_content,
