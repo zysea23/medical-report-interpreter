@@ -38,7 +38,6 @@ app.add_middleware(
    allow_headers=["*"],
 )
 
-
 # Setup static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -82,6 +81,7 @@ async def upload_file(file: UploadFile = File(...)):
    # calculate processing time
    import time
    start_time = time.time()
+   
    try:
        # Generate unique filename
        file_extension = os.path.splitext(file.filename)[1]
@@ -91,7 +91,7 @@ async def upload_file(file: UploadFile = File(...)):
        # Save uploaded file
        file_path = await save_upload_file(file, UPLOAD_DIR, unique_filename)
 
-
+      
        # Process report
        original_content, explanation, indicators = await process_report(file_path)
 
@@ -109,6 +109,9 @@ async def upload_file(file: UploadFile = File(...)):
            "filename": unique_filename
        }
    except Exception as e:
+       import traceback
+       error_details = traceback.format_exc()
+       print(f"Error details: {error_details}")
        return JSONResponse(
            status_code=500,
            content={"success": False, "message": f"Processing failed: {str(e)}"}

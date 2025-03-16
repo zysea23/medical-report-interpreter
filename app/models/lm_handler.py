@@ -4,9 +4,19 @@ import json
 import base64
 import os
 from pathlib import Path
+import cv2
+import numpy as np
+import easyocr  
+import re
 
+from PIL import Image
+
+if not hasattr(Image, 'ANTIALIAS'):
+    Image.ANTIALIAS = Image.LANCZOS
 
 class LMStudioHandler:
+    
+#  Use for Docker : def __init__(self, api_url="http://host.docker.internal:1234/v1/chat/completions"):
    def __init__(self, api_url="http://localhost:1234/v1/chat/completions"):
        self.api_url = api_url
        self.headers = {
@@ -17,44 +27,25 @@ class LMStudioHandler:
        self.metrics_file = os.path.join(os.path.dirname(__file__), 'medical_metrics.json')
   
    async def process_medical_image(self, image_path: Path):
-       """Extract content from medical report image using LMStudio API"""
-       try:
-           # Read image file as base64
-           with open(image_path, "rb") as image_file:
-               base64_image = base64.b64encode(image_file.read()).decode('utf-8')
-          
-           # Create prompt for extracting information from image
-           prompt = """
-           Analyze this medical report image and complete the following tasks:
-           1. Extract all visible text, including content in tables
-           2. Identify key medical indicators and their values
-           3. Determine the structure of the report (e.g., personal information, test items, results, reference values)
-           4. Organize into a structured format
-           5. Highlight any abnormal values
-           """
-          
-           payload = {
-               "model": "local-model", # Model name used by LMStudio
-               "messages": [
-                   {"role": "system", "content": "You are a medical report analysis assistant. Extract all text and structure from medical report images accurately."},
-                   {"role": "user", "content": [
-                       {"type": "text", "text": prompt},
-                       {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-                   ]}
-               ],
-               "temperature": 0,
-               "max_tokens": 4000
-           }
-          
-           response = requests.post(self.api_url, headers=self.headers, data=json.dumps(payload))
-          
-           if response.status_code == 200:
-               result = response.json()
-               return result['choices'][0]['message']['content']
-           else:
-               raise Exception(f"Image analysis API call failed, status code: {response.status_code}")
-       except Exception as e:
-           raise Exception(f"Image processing failed: {str(e)}")
+        """Extract content from medical report image using EasyOCR"""
+        try:
+
+            reader = easyocr.Reader(['en', 'ch_sim'])
+            
+            image = cv2.imread(str(image_path))
+            
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            
+            results = reader.readtext(gray, detail=0, paragraph=True)
+            
+            text = "\n".join(results)
+            
+            print(f"OCR extracted {len(text)} characters from the image")
+            return text
+            
+        except Exception as e:
+            raise Exception(f"Image processing failed: {str(e)}")
+        
   
    async def interpret_medical_report(self, report_content):
        """Use LMStudio to interpret medical report content"""
