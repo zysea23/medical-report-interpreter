@@ -11,6 +11,9 @@ async def process_report(file_path: Path):
       
        # Use LMStudio API to analyze image and extract content
        original_content = await lm_handler.process_medical_image(file_path)
+       
+       # Generate summary of the medical report
+       summary = await lm_handler.summarize_medical_report(original_content)
       
        # Use LMStudio API to interpret content
        explanation = await lm_handler.interpret_medical_report(original_content)
@@ -21,7 +24,7 @@ async def process_report(file_path: Path):
        # Get indicators with normal ranges
        indicators_with_ranges = lm_handler.add_normal_ranges(raw_indicators)
       
-       return original_content, explanation, indicators_with_ranges
+       return summary, explanation, indicators_with_ranges
    
    except Exception as e:
        raise Exception(f"Report processing failed: {str(e)}")

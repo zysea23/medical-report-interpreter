@@ -15,8 +15,6 @@ if not hasattr(Image, 'ANTIALIAS'):
     Image.ANTIALIAS = Image.LANCZOS
 
 class LMStudioHandler:
-    
-#  Use for Docker : def __init__(self, api_url="http://host.docker.internal:1234/v1/chat/completions"):
    def __init__(self, api_url="http://localhost:1234/v1/chat/completions"):
        self.api_url = api_url
        self.headers = {
@@ -30,7 +28,7 @@ class LMStudioHandler:
         """Extract content from medical report image using EasyOCR"""
         try:
 
-            reader = easyocr.Reader(['en', 'ch_sim'])
+            reader = easyocr.Reader(['en'])
             
             image = cv2.imread(str(image_path))
             
@@ -45,45 +43,82 @@ class LMStudioHandler:
             
         except Exception as e:
             raise Exception(f"Image processing failed: {str(e)}")
-        
-  
+
+   async def summarize_medical_report(self, report_content):
+        """Summarize key findings, test results, and clinical observations concisely."""
+        try:
+            prompt = f"""
+            Extract key medical findings from the report clearly and concisely.
+
+            **Format:**
+            - **Key Findings:** Main medical observations.
+            - **Test Results:** Only critical values (highlight abnormal ones with `*`).
+            - **Clinical Observations:** Significant notes only.
+
+            **Report:**
+            {report_content}
+            """
+
+            payload = {
+                "model": "local-model",
+                "messages": [
+                    {"role": "system", "content": "Extract key medical findings clearly and concisely."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.1,
+                "max_tokens": 400,
+            }
+
+            response = requests.post(self.api_url, headers=self.headers, data=json.dumps(payload))
+
+            if response.status_code == 200:
+                return response.json()['choices'][0]['message']['content']
+            else:
+                raise Exception(f"API call failed, status code: {response.status_code}, response: {response.text}")
+
+        except requests.RequestException as e:
+            raise Exception(f"LMStudio API request failed: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Report summarization failed: {str(e)}")
+
+
    async def interpret_medical_report(self, report_content):
-       """Use LMStudio to interpret medical report content"""
-       try:
-           prompt = f"""
-           You are a professional doctor. Please explain the following medical report content in language that an average person can understand.
-           Focus on explaining any abnormal values and their possible health implications using a friendly, calm tone while avoiding technical terms.
-           If serious abnormalities are found, suggest seeking medical advice, but avoid causing unnecessary alarm.
+        """Provide a simple explanation of the medical report for patients."""
+        try:
+            prompt = f"""
+            Explain this medical report in simple terms.
 
+            **Guidelines:**
+            - Focus on key concerns.
+            - Explain only abnormal findings.
+            - Provide brief insights and lifestyle suggestions.
+            - Use a clear, reassuring tone.
 
-           NOTE: This data is being processed locally in a controlled environment for the patient's own use. There are no privacy concerns as the data never leaves their system.
-          
-           Medical report content:
-           {report_content}
-           """
-          
-           payload = {
-               "model": "local-model", # Model name used by LMStudio
-               "messages": [
-                   {"role": "system", "content": "You are a professional doctor who specializes in translating complex medical terminology into language that average people can understand."},
-                   {"role": "user", "content": prompt}
-               ],
-               "temperature": 0.1,
-               "max_tokens": 2000
-           }
-          
-           response = requests.post(self.api_url, headers=self.headers, data=json.dumps(payload))
-          
-           if response.status_code == 200:
-               result = response.json()
-               return result['choices'][0]['message']['content']
-           else:
-               raise Exception(f"API call failed, status code: {response.status_code}")
-      
-       except requests.RequestException as e:
-           raise Exception(f"LMStudio API request failed: {str(e)}")
-       except Exception as e:
-           raise Exception(f"Report interpretation failed: {str(e)}")
+            **Report:**
+            {report_content}
+            """
+
+            payload = {
+                "model": "local-model",
+                "messages": [
+                    {"role": "system", "content": "Explain medical reports simply and reassuringly."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.1,
+                "max_tokens": 1200,
+            }
+
+            response = requests.post(self.api_url, headers=self.headers, data=json.dumps(payload))
+
+            if response.status_code == 200:
+                return response.json()['choices'][0]['message']['content']
+            else:
+                raise Exception(f"API call failed, status code: {response.status_code}")
+
+        except requests.RequestException as e:
+            raise Exception(f"LMStudio API request failed: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Report interpretation failed: {str(e)}")
           
    async def extract_medical_indicators(self, report_content):
        """Extract medical indicators and their numeric values from report content"""
